@@ -1,0 +1,239 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Media_Type {
+    id Int @id @default(autoincrement())
+    type String @db.VarChar(50)
+
+    medias Media[]
+	@@map("MediaType")
+}
+
+model Tag {
+  id Int @id @default(autoincrement())
+  tag String @db.VarChar(50)
+  color String @db.VarChar(20)
+
+  challenges Challenge_Tag[]
+}
+
+model Challenge_Type {
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(50)
+
+  challenges Challenge[]
+}
+
+model Group_Type {
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(50)
+
+  groups Group[]
+}
+
+model Placement {
+  id Int @id @default(autoincrement())
+  place Int
+  points Decimal @db.Decimal(12,2)
+
+  participents Participent[]
+}
+
+model Member_Type {
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(50)
+
+  members Role[]
+}
+
+model Message_Type {
+  id Int @id @default(autoincrement())
+  type String @db.VarChar(50)
+
+  messages Message[]
+}
+
+model Message {
+  id Int @id @default(autoincrement())
+  title String @db.VarChar(50)
+  body String @db.VarChar(500)
+  sent_date DateTime? @default(now()) @db.Timestamp
+
+  FK_message_type_id Int
+  type Message_Type @relation(fields: [FK_message_type_id], references: [id])
+
+  grousp Group_Message[]
+  users User_Message[]
+}
+
+model Media {
+  id Int @id @default(autoincrement())
+  path String
+  created_at DateTime?  @default(now())
+  updated_at DateTime?  @updatedAt
+
+  FK_media_type_id Int
+  type Media_Type @relation(fields: [FK_media_type_id], references: [id])
+
+  groups Group[]
+  users User[]
+  posts Media_Post[]
+}
+
+model Group {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  created_at DateTime?  @default(now())
+  updated_at DateTime?  @updatedAt
+
+  FK_group_type_id Int
+  type Group_Type @relation(fields: [FK_group_type_id], references: [id])
+
+  FK_media_id Int // Grup profile pic
+  profile Media @relation(fields: [FK_media_id], references: [id])
+
+  messages Group_Message[]
+  challenges Challenge[]
+  users Member[]
+}
+
+model Group_Message {
+  id Int @id @default(autoincrement())
+
+  FK_message_id Int
+  message Message @relation(fields: [FK_message_id], references: [id])
+
+  FK_group_id Int
+  group Group @relation(fields: [FK_group_id], references: [id])
+}
+
+model Challenge {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  start_date DateTime?
+  deadline DateTime?
+
+  FK_challenge_type_id Int
+  type Challenge_Type @relation(fields: [FK_challenge_type_id], references: [id])
+
+  FK_group_id Int
+  group Group @relation(fields: [FK_group_id], references: [id])
+
+  point_distributions Point_Distribution[]
+  tags Challenge_Tag[]
+  participents Participent[]
+}
+
+model Point_Distribution {
+  id Int @id @default(autoincrement())
+  start_place Int
+  end_place Int?
+  amount Decimal @db.Decimal(12, 2)
+
+  FK_challenge_id Int
+  challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
+}
+
+model Challenge_Tag {
+  id Int @id @default(autoincrement())
+
+  FK_challenge_id Int
+  challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
+
+  FK_tag_id Int
+  tag Tag @relation(fields: [FK_tag_id], references: [id])
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  username String @db.VarChar(100)
+  email String @db.VarChar(255)
+  password_hash String @db.VarChar(1000)
+  created_at DateTime?  @default(now())
+  updated_at DateTime?  @updatedAt
+  refresh_token_hash String @db.VarChar(1000)
+
+  FK_media_id Int
+  profile Media @relation(fields: [FK_media_id], references: [id])
+
+  messages User_Message[]
+  groups Member[]
+}
+
+model User_Message {
+  id Int @id @default(autoincrement())
+  
+  FK_message_id Int
+  message Message @relation(fields: [FK_message_id], references: [id])
+
+  FK_user_id Int
+  user User @relation(fields: [FK_user_id], references: [id])
+}
+
+model Member {
+  id Int @id @default(autoincrement())
+  nickname String? @db.VarChar(100)
+  
+  FK_user_id Int
+  user User @relation(fields: [FK_user_id], references: [id])
+
+  FK_group_id Int
+  group Group @relation(fields: [FK_group_id], references: [id])
+
+  types Role[] // roles
+  challenges Participent[]
+}
+
+model Role {
+  id Int @id @default(autoincrement())
+
+  FK_member_id Int
+  member Member @relation(fields: [FK_member_id], references: [id])
+
+  FK_member_type_id Int
+  member_type Member_Type @relation(fields: [FK_member_type_id], references: [id]) 
+}
+
+model Participent {
+  id Int @id @default(autoincrement())
+  
+  FK_member_id Int
+  member Member @relation(fields: [FK_member_id], references: [id])
+
+  FK_challenge_id Int
+  challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
+
+  FK_placement_id Int
+  placement Placement @relation(fields: [FK_placement_id], references: [id])
+
+  posts Post[]
+}
+
+model Post {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(300)
+  
+  FK_participent_id Int
+  participent Participent @relation(fields: [FK_participent_id], references: [id])
+
+  media_list Media_Post[]
+}
+
+model Media_Post {
+  id Int @id @default(autoincrement())
+
+  FK_media_id Int
+  media Media @relation(fields: [FK_media_id], references: [id])
+
+  FK_post_id Int
+  post Post @relation(fields: [FK_post_id], references: [id])
+}
