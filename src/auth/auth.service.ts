@@ -6,6 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from '../types/tokens.type';
 import { ExtractJwt } from 'passport-jwt';
+import { User } from 'prisma';
 
 @Injectable()
 export class AuthService {
@@ -20,10 +21,12 @@ export class AuthService {
     const newUser = await this._prisma.user.create({
       data: {
         username: dto.username,
-        password: passwordHash,
         email: dto.email,
-      },
-    });
+        password_hash: passwordHash,
+        refresh_token_hash: "test",
+        FK_media_id: 0
+      }
+    })
     const tokens = await this._getTokens(
       newUser.id,
       newUser.email,
@@ -32,11 +35,11 @@ export class AuthService {
     await this._updateRefreshToken(newUser.id, tokens.refresh_token);
     return tokens;
   }
-
+  //
   async signinLocal(dto: AuthDto) {
     const user = await this._prisma.user.findUnique({
       where: {
-        email: dto.email,
+        id: 1,
       },
     });
 
@@ -44,7 +47,7 @@ export class AuthService {
       throw new NotFoundException('Access denied');
     }
 
-    if (!(await argon.verify(user.password, dto.password))) {
+    if (!(await argon.verify(user.password_hash, dto.password))) {
       throw new NotFoundException('Access denied');
     }
     const tokens = await this._getTokens(user.id, user.email, user.username);
@@ -56,12 +59,12 @@ export class AuthService {
     await this._prisma.user.updateMany({
       where: {
         id: usedId,
-        hashedRt: {
+        refresh_token_hash: {
           not: null,
         },
       },
       data: {
-        hashedRt: null,
+        refresh_token_hash: null,
       },
     });
   }
@@ -75,7 +78,7 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException('Access denied');
     }
-    if (!(await argon.verify(user.hashedRt, refreshToken))) {
+    if (!(await argon.verify(user.refresh_token_hash, refreshToken))) {
       throw new ForbiddenException('Access Denied');
     }
     const tokens = await this._getTokens(user.id, user.email, user.username);
@@ -90,7 +93,7 @@ export class AuthService {
         id: userId,
       },
       data: {
-        hashedRt: hash,
+        refresh_token_hash: hash,
       },
     });
   }
