@@ -7,3 +7,4 @@ import { GroupController } from './group.controller';
   providers: [GroupService]
 })
 export class GroupModule {}
+//just a comment
