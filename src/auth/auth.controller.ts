@@ -23,7 +23,7 @@ export class AuthController {
     return this._authService.signupLocal(dto);
   }
 
-  @Post('local/login')
+  @Post('local/signin')
   @HttpCode(HttpStatus.OK)
   signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
     return this._authService.signinLocal(dto);
