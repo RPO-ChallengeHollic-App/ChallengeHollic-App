@@ -1,11 +1,15 @@
-import {ForbiddenException, Injectable, InternalServerErrorException, NotFoundException} from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuthDto } from './dto/auth.dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from '../types/tokens.type';
-import {InvalidClassException} from "@nestjs/core/errors/exceptions/invalid-class.exception";
 
 @Injectable()
 export class AuthService {
@@ -23,17 +27,19 @@ export class AuthService {
           username: dto.username,
           email: dto.email,
           password_hash: passwordHash,
-        }
-      })
+        },
+      });
       const tokens = await this._getTokens(
-          newUser.id,
-          newUser.email,
-          newUser.username,
+        newUser.id,
+        newUser.email,
+        newUser.username,
       );
       await this._updateRefreshToken(newUser.id, tokens.refresh_token);
       return tokens;
     } catch (err) {
-      throw new InternalServerErrorException(`Unable to signup user. Username or email may already be taken`)
+      throw new InternalServerErrorException(
+        `Unable to signup user. Username or email may already be taken`,
+      );
     }
   }
   //
