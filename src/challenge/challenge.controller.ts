@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpCode, HttpStatus } from "@nestjs/common";
+import {Body, Controller, Delete, Get, HttpCode, HttpStatus, Post} from "@nestjs/common";
 import { ChallengeService } from './challenge.service';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { GetChallengeId } from './decorator/get-challenge-id.decorator';
@@ -7,7 +7,7 @@ import { GetChallengeId } from './decorator/get-challenge-id.decorator';
 export class ChallengeController {
   constructor(private readonly _challengeService: ChallengeService) {}
 
-  @Delete('create')
+  @Post('create')
   @HttpCode(HttpStatus.CREATED)
   async createChallenge(@Body() createChallengeDto: CreateChallengeDto) {
     const newChallenge = await this._challengeService.createChallenge(
@@ -18,14 +18,14 @@ export class ChallengeController {
     };
   }
 
-  @Delete('get/:challengeId')
+  @Get('get/:challengeId')
   @HttpCode(HttpStatus.OK)
-  async getChallengeId(@GetChallengeId() challengeId: number) {
+  async getChallengeFromId(@GetChallengeId() challengeId: number) {
     const challenge = await this._challengeService.getChallengeFromId(
       challengeId,
     );
     return {
-      challenge: challengeId,
+      challenge: challenge,
     };
   }
 

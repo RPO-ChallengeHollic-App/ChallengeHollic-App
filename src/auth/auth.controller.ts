@@ -4,14 +4,15 @@ import {
   HttpCode,
   HttpStatus,
   Post,
-  Req,
-  UseGuards,
+  Req, UploadedFile,
+  UseGuards, UseInterceptors,
 } from '@nestjs/common';
 import { AuthDto } from './dto/auth.dto';
 import { Tokens } from '../types/tokens.type';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import {FileInterceptor} from "@nestjs/platform-express";
 
 @Controller('api/auth')
 export class AuthController {
@@ -19,7 +20,8 @@ export class AuthController {
 
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
-  signupLocal(@Body() dto: AuthDto): Promise<Tokens> {
+  @UseInterceptors(FileInterceptor('profile_image'))
+  signupLocal(@UploadedFile() profileImage: Express.Multer.File, @Body() dto: AuthDto): Promise<Tokens> {
     return this._authService.signupLocal(dto);
   }
 

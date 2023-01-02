@@ -23,13 +23,13 @@ export class ChallengeTypeController {
     const newChallengeType =
       await this._challengeTypeService.createChallengeType(createChallengeType);
     return {
-      challengeTyper: newChallengeType,
+      challengeType: newChallengeType,
     };
   }
 
   @Get('get/:challengeTypeId')
   @HttpCode(HttpStatus.OK)
-  async getChallengeTypeId(@GetChallengeTypeId() challengeTypeId: number) {
+  async getChallengeTypeFromId(@GetChallengeTypeId() challengeTypeId: number) {
     const challengeType =
       await this._challengeTypeService.getChallengeTypeFromId(challengeTypeId);
     return {

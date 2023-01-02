@@ -14,7 +14,7 @@ export class ParticipentController {
       createParticipentDto,
     );
     return {
-      participent: newParticipent,
+      placement: newParticipent,
     };
   }
 
@@ -25,7 +25,7 @@ export class ParticipentController {
       participentId,
     );
     return {
-      participent: participent,
+      placement: participent,
     };
   }
 
@@ -36,7 +36,7 @@ export class ParticipentController {
       participentId,
     );
     return {
-      participent: participent,
+      placement: participent,
     };
   }
 }

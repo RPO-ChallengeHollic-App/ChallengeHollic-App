@@ -28,13 +28,13 @@ export class ChallengeService {
 
   async getChallengeFromId(challengeId: number) {
     try {
-      return await this._prisma.challenge.findUnique({
+      return this._prisma.challenge.findUnique({
         where: {
           id: challengeId,
         },
       });
     } catch (err) {
-      throw new NotFoundException('Challenge could not be foudn');
+      throw new NotFoundException('Challenge could not be found');
     }
   }
 
@@ -46,7 +46,7 @@ export class ChallengeService {
         },
       });
     } catch (err) {
-      throw new NotFoundException('Challenge could not be foudn');
+      throw new NotFoundException('Challenge could not be found');
     }
   }
 }

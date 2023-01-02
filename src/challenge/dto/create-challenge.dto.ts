@@ -1,14 +1,14 @@
-import { IsDate, IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import {IsDate, IsDateString, IsNotEmpty, IsNumber, IsString} from 'class-validator';
 
 export class CreateChallengeDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsDate()
+  @IsDateString()
   start_data?: string;
 
-  @IsDate()
+  @IsDateString()
   deadline?: string;
 
   @IsNumber({

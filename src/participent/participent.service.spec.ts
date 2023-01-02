@@ -1,11 +1,11 @@
 import {Test, TestingModule} from "@nestjs/testing";
 import {PrismaService} from "../prisma/prisma.service";
-import {ChallengeTypeService} from "./challenge-type.service";
+import {ParticipentService} from "./participent.service";
 
-describe('ChallengeTypeService', () => {
-    let service: ChallengeTypeService;
+describe('ParticipentService', () => {
+    let service: ParticipentService;
     const mocPrismaService = {
-        challenge_Type: {
+        participent: {
             create: jest.fn((param: {data: object}) => {
                 return {
                     id: Date.now(),
@@ -15,13 +15,17 @@ describe('ChallengeTypeService', () => {
             findUnique: jest.fn((param: {where: object}) => {
                 return {
                     id: param.where['id'],
-                    type: 'Some test',
+                    FK_placement_id: 1,
+                    FK_member_id: 2,
+                    FK_challenge_id: 3,
                 }
             }),
             delete: jest.fn((param: {where: object}) => {
                 return {
                     id: param.where['id'],
-                    type: 'Some test',
+                    FK_placement_id: 1,
+                    FK_member_id: 2,
+                    FK_challenge_id: 3,
                 }
             }),
         }
@@ -29,10 +33,10 @@ describe('ChallengeTypeService', () => {
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
-            providers: [ChallengeTypeService, PrismaService],
+            providers: [ParticipentService, PrismaService],
         }).overrideProvider(PrismaService).useValue(mocPrismaService).compile();
 
-        service = module.get<ChallengeTypeService>(ChallengeTypeService);
+        service = module.get<ParticipentService>(ParticipentService);
     })
 
     it('should be defined', () => {
@@ -40,31 +44,39 @@ describe('ChallengeTypeService', () => {
     });
 
     it('should create challenge and return it', async () => {
-        const result = await service.createChallengeType({
-            type: 'Test type'
+        const result = await service.createParticipent({
+            placementId: 1,
+            memberId: 2,
+            challengeId: 3,
         });
         expect(result).toEqual({
             id: expect.any(Number),
-            type: 'Test type',
+            FK_placement_id: 1,
+            FK_member_id: 2,
+            FK_challenge_id: 3,
         });
-        expect(mocPrismaService.challenge_Type.create).toHaveBeenCalled();
+        expect(mocPrismaService.participent.create).toHaveBeenCalled();
     });
 
     it('should get challenge with id and return it', async () => {
-        const result = await service.getChallengeTypeFromId(2);
+        const result = await service.getParticipentFromId(2);
         expect(result).toEqual({
             id: 2,
-            type: expect.any(String),
+            FK_placement_id: expect.any(Number),
+            FK_member_id: expect.any(Number),
+            FK_challenge_id: expect.any(Number),
         });
-        expect(mocPrismaService.challenge_Type.findUnique).toHaveBeenCalled();
+        expect(mocPrismaService.participent.findUnique).toHaveBeenCalled();
     });
 
     it('should delete challenge with id and return it', async () => {
-        const result = await service.removeChallengeType(2);
+        const result = await service.removeParticipent(2);
         expect(result).toEqual({
             id: 2,
-            type: expect.any(String),
+            FK_placement_id: expect.any(Number),
+            FK_member_id: expect.any(Number),
+            FK_challenge_id: expect.any(Number),
         });
-        expect(mocPrismaService.challenge_Type.delete).toHaveBeenCalled();
+        expect(mocPrismaService.participent.delete).toHaveBeenCalled();
     });
 });
