@@ -6,8 +6,18 @@ import { PlacementModule } from './placement/placement.module';
 import { ParticipentModule } from './participent/participent.module';
 import { ChallengeModule } from './challenge/challenge.module';
 import { ChallengeTypeModule } from './challenge-type/challenge-type.module';
+import {MulterModule} from "@nestjs/platform-express";
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule, AuthModule, PlacementModule, ParticipentModule, ChallengeModule, ChallengeModule, ChallengeTypeModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    PlacementModule,
+    ParticipentModule,
+    ChallengeModule,
+    ChallengeModule,
+    ChallengeTypeModule,
+  ],
   controllers: [],
   providers: [],
 })

@@ -9,7 +9,8 @@ import { AuthDto } from './dto/auth.dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Tokens } from '../types/tokens.type';
+import {Tokens} from "../shared/types/tokens.type";
+import {Media} from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -19,14 +20,25 @@ export class AuthService {
     private _config: ConfigService,
   ) {}
 
-  async signupLocal(dto: AuthDto) {
+  async signupLocal(dto: AuthDto, profileImageFile?: Express.Multer.File) {
     try {
+      let profileImage: Media | null = null;
       const passwordHash = await this._hashData(dto.password);
+
+      if (profileImageFile) {
+        profileImage = await this._prisma.media.create({
+          data: {
+            FK_media_type_id: 1,
+            path: profileImageFile.originalname,
+          }
+        });
+      }
       const newUser = await this._prisma.user.create({
         data: {
           username: dto.username,
           email: dto.email,
           password_hash: passwordHash,
+          FK_media_id: profileImage ? profileImage.id : null
         },
       });
       const tokens = await this._getTokens(
