@@ -5,12 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthDto } from './dto/auth.dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import {Tokens} from "../shared/types/tokens.type";
 import {Media} from '@prisma/client';
+import {SigninDto} from "./dto/signin.dto";
+import {SignupDto} from "./dto/signup.dto";
 
 @Injectable()
 export class AuthService {
@@ -20,7 +21,7 @@ export class AuthService {
     private _config: ConfigService,
   ) {}
 
-  async signupLocal(dto: AuthDto, profileImageFile?: Express.Multer.File) {
+  async signupLocal(dto: SignupDto, profileImageFile?: Express.Multer.File) {
     try {
       let profileImage: Media | null = null;
       const passwordHash = await this._hashData(dto.password);
@@ -55,10 +56,13 @@ export class AuthService {
     }
   }
   //
-  async signinLocal(dto: AuthDto) {
-    const user = await this._prisma.user.findUnique({
+  async signinLocal(dto: SigninDto) {
+    const user = await this._prisma.user.findFirst({
       where: {
-        id: 1,
+        OR: [
+          {email: dto.username},
+          {username: dto.username}
+        ]
       },
     });
 

@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
-import { AccessTokenStrategy } from '../strategies/access-token.strategy';
-import { RefreshTokenStrategy } from '../strategies/refresh-token.strategy';
 import {MulterModule} from "@nestjs/platform-express";
+import {AccessTokenStrategy} from "../shared/strategies/access-token.strategy";
+import {RefreshTokenStrategy} from "../shared/strategies/refresh-token.strategy";
 
 @Module({
   imports: [

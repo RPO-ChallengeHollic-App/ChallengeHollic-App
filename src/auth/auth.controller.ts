@@ -8,7 +8,6 @@ import {
   Req, UploadedFile,
   UseGuards, UseInterceptors,
 } from '@nestjs/common';
-import { AuthDto } from './dto/auth.dto';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
@@ -16,6 +15,8 @@ import {FileInterceptor} from "@nestjs/platform-express";
 import { Tokens } from 'src/shared/types/tokens.type';
 import {imageFileValidator} from "../shared/validators/file/image-file.validator";
 import {diskStorage} from "multer";
+import {SigninDto} from "./dto/signin.dto";
+import {SignupDto} from "./dto/signup.dto";
 
 @Controller('api/auth')
 export class AuthController {
@@ -36,21 +37,27 @@ export class AuthController {
       }
     })
   }))
-  signupLocal(
+  async signupLocal(
     @Req() req: any,
     @UploadedFile() profileImage: Express.Multer.File,
-    @Body() dto: AuthDto
-  ): Promise<Tokens> {
+    @Body() dto: SignupDto
+  ): Promise<{ tokens: Tokens }> {
     if (req.fileValidationError) {
       throw new BadRequestException(req.fileValidationError)
     }
-    return this._authService.signupLocal(dto, profileImage);
+    const tokens = await this._authService.signupLocal(dto, profileImage);
+    return {
+      tokens: tokens,
+    };
   }
 
   @Post('local/signin')
   @HttpCode(HttpStatus.OK)
-  signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
-    return this._authService.signinLocal(dto);
+  async signinLocal(@Body() dto: SigninDto): Promise<{ tokens: Tokens }> {
+    const tokens = await this._authService.signinLocal(dto);
+    return {
+      tokens: tokens,
+    }
   }
 
   // 'jwt' because name of our strategy is jwt
@@ -67,9 +74,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Req() req: Request) {
     const user = req.user;
-    return await this._authService.refreshToken(
+    const refreshToken = await this._authService.refreshToken(
       user['uid'],
       user['refreshToken'],
     );
+    return {
+      token: refreshToken
+    }
   }
 }
