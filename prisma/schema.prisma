@@ -167,6 +167,22 @@ model User {
 
     messages User_Message[]
     groups Member[]
+
+id Int @id @default(autoincrement())
+  username String @db.VarChar(100)
+  email String @db.VarChar(255)
+  password_hash String @db.VarChar(1000)
+  created_at DateTime?  @default(now())
+  updated_at DateTime?  @updatedAt
+  refresh_token_hash String? @db.VarChar(1000)
+
+  FK_media_id Int?
+  profile Media? @relation(fields: [FK_media_id], references: [id])
+
+  messages User_Message[]
+  groups Member[]
+
+    @@unique([username, email])
 }
 
 model User_Message {
