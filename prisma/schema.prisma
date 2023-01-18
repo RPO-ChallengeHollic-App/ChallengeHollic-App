@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -66,7 +66,7 @@ model Message {
   id Int @id @default(autoincrement())
   title String @db.VarChar(50)
   body String @db.VarChar(500)
-  sent_date DateTime? @default(now()) @db.Timestamp
+  sent_date DateTime? @default(now())
 
   FK_message_type_id Int
   type Message_Type @relation(fields: [FK_message_type_id], references: [id])
