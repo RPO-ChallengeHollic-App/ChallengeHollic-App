@@ -1,17 +1,22 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   HttpCode,
   HttpStatus,
   Post,
-  Req,
-  UseGuards,
+  Req, UploadedFile,
+  UseGuards, UseInterceptors,
 } from '@nestjs/common';
-import { AuthDto } from './dto/auth.dto';
-import { Tokens } from '../types/tokens.type';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
+import {FileInterceptor} from "@nestjs/platform-express";
+import { Tokens } from 'src/shared/types/tokens.type';
+import {imageFileValidator} from "../shared/validators/file/image-file.validator";
+import {diskStorage} from "multer";
+import {SigninDto} from "./dto/signin.dto";
+import {SignupDto} from "./dto/signup.dto";
 
 @Controller('api/auth')
 export class AuthController {
@@ -19,14 +24,40 @@ export class AuthController {
 
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
-  signupLocal(@Body() dto: AuthDto): Promise<Tokens> {
-    return this._authService.signupLocal(dto);
+  @UseInterceptors(FileInterceptor('profile_image', {
+    limits: {
+      fileSize: 5e+6, // 5MB
+    },
+    fileFilter: imageFileValidator,
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, callback) => {
+        const uniquePrefix: string = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        callback(null, `${uniquePrefix}-${file.originalname}`);
+      }
+    })
+  }))
+  async signupLocal(
+    @Req() req: any,
+    @UploadedFile() profileImage: Express.Multer.File,
+    @Body() dto: SignupDto
+  ): Promise<{ tokens: Tokens }> {
+    if (req.fileValidationError) {
+      throw new BadRequestException(req.fileValidationError)
+    }
+    const tokens = await this._authService.signupLocal(dto, profileImage);
+    return {
+      tokens: tokens,
+    };
   }
 
-  @Post('local/login')
+  @Post('local/signin')
   @HttpCode(HttpStatus.OK)
-  signinLocal(@Body() dto: AuthDto): Promise<Tokens> {
-    return this._authService.signinLocal(dto);
+  async signinLocal(@Body() dto: SigninDto): Promise<{ tokens: Tokens }> {
+    const tokens = await this._authService.signinLocal(dto);
+    return {
+      tokens: tokens,
+    }
   }
 
   // 'jwt' because name of our strategy is jwt
@@ -43,9 +74,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async refreshToken(@Req() req: Request) {
     const user = req.user;
-    return await this._authService.refreshToken(
+    const refreshToken = await this._authService.refreshToken(
       user['uid'],
       user['refreshToken'],
     );
+    return {
+      token: refreshToken
+    }
   }
 }

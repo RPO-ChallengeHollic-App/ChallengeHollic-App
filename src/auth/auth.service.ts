@@ -1,12 +1,17 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { AuthDto } from './dto/auth.dto';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { Tokens } from '../types/tokens.type';
-import { ExtractJwt } from 'passport-jwt';
-import { User } from 'prisma';
+import {Tokens} from "../shared/types/tokens.type";
+import {Media} from '@prisma/client';
+import {SigninDto} from "./dto/signin.dto";
+import {SignupDto} from "./dto/signup.dto";
 
 @Injectable()
 export class AuthService {
@@ -16,30 +21,48 @@ export class AuthService {
     private _config: ConfigService,
   ) {}
 
-  async signupLocal(dto: AuthDto) {
-    const passwordHash = await this._hashData(dto.password);
-    const newUser = await this._prisma.user.create({
-      data: {
-        username: dto.username,
-        email: dto.email,
-        password_hash: passwordHash,
-        refresh_token_hash: "test",
-        FK_media_id: 0
+  async signupLocal(dto: SignupDto, profileImageFile?: Express.Multer.File) {
+    try {
+      let profileImage: Media | null = null;
+      const passwordHash = await this._hashData(dto.password);
+
+      if (profileImageFile) {
+        profileImage = await this._prisma.media.create({
+          data: {
+            FK_media_type_id: 1,
+            path: profileImageFile.originalname,
+          }
+        });
       }
-    })
-    const tokens = await this._getTokens(
-      newUser.id,
-      newUser.email,
-      newUser.username,
-    );
-    await this._updateRefreshToken(newUser.id, tokens.refresh_token);
-    return tokens;
+      const newUser = await this._prisma.user.create({
+        data: {
+          username: dto.username,
+          email: dto.email,
+          password_hash: passwordHash,
+          FK_media_id: profileImage ? profileImage.id : null
+        },
+      });
+      const tokens = await this._getTokens(
+        newUser.id,
+        newUser.email,
+        newUser.username,
+      );
+      await this._updateRefreshToken(newUser.id, tokens.refresh_token);
+      return tokens;
+    } catch (err) {
+      throw new InternalServerErrorException(
+        `Unable to signup user. Username or email may already be taken`,
+      );
+    }
   }
   //
-  async signinLocal(dto: AuthDto) {
-    const user = await this._prisma.user.findUnique({
+  async signinLocal(dto: SigninDto) {
+    const user = await this._prisma.user.findFirst({
       where: {
-        id: 1,
+        OR: [
+          {email: dto.username},
+          {username: dto.username}
+        ]
       },
     });
 
