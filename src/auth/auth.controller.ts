@@ -24,26 +24,30 @@ export class AuthController {
 
   @Post('local/signup')
   @HttpCode(HttpStatus.CREATED)
-  @UseInterceptors(FileInterceptor('profile_image', {
-    limits: {
-      fileSize: 5e+6, // 5MB
-    },
-    fileFilter: imageFileValidator,
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, callback) => {
-        const uniquePrefix: string = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        callback(null, `${uniquePrefix}-${file.originalname}`);
-      }
-    })
-  }))
+  @UseInterceptors(
+    FileInterceptor('profile_image', {
+      limits: {
+        fileSize: 5e6, // 5MB
+      },
+      fileFilter: imageFileValidator,
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniquePrefix: string = `${Date.now()}-${Math.round(
+            Math.random() * 1e9,
+          )}`;
+          callback(null, `${uniquePrefix}-${file.originalname}`);
+        },
+      }),
+    }),
+  )
   async signupLocal(
     @Req() req: any,
     @UploadedFile() profileImage: Express.Multer.File,
-    @Body() dto: SignupDto
+    @Body() dto: SignupDto,
   ): Promise<{ tokens: Tokens }> {
     if (req.fileValidationError) {
-      throw new BadRequestException(req.fileValidationError)
+      throw new BadRequestException(req.fileValidationError);
     }
     const tokens = await this._authService.signupLocal(dto, profileImage);
     return {
@@ -57,7 +61,7 @@ export class AuthController {
     const tokens = await this._authService.signinLocal(dto);
     return {
       tokens: tokens,
-    }
+    };
   }
 
   // 'jwt' because name of our strategy is jwt
@@ -79,7 +83,7 @@ export class AuthController {
       user['refreshToken'],
     );
     return {
-      token: refreshToken
-    }
+      token: refreshToken,
+    };
   }
 }

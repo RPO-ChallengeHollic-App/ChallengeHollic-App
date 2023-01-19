@@ -21,25 +21,41 @@ let AuthService = class AuthService {
         this._jwt = _jwt;
         this._config = _config;
     }
-    async signupLocal(dto) {
-        const passwordHash = await this._hashData(dto.password);
-        const newUser = await this._prisma.user.create({
-            data: {
-                username: dto.username,
-                email: dto.email,
-                password_hash: passwordHash,
-                refresh_token_hash: "test",
-                FK_media_id: 0
+    async signupLocal(dto, profileImageFile) {
+        try {
+            let profileImage = null;
+            const passwordHash = await this._hashData(dto.password);
+            if (profileImageFile) {
+                profileImage = await this._prisma.media.create({
+                    data: {
+                        FK_media_type_id: 2,
+                        path: profileImageFile.originalname,
+                    }
+                });
             }
-        });
-        const tokens = await this._getTokens(newUser.id, newUser.email, newUser.username);
-        await this._updateRefreshToken(newUser.id, tokens.refresh_token);
-        return tokens;
+            const newUser = await this._prisma.user.create({
+                data: {
+                    username: dto.username,
+                    email: dto.email,
+                    password_hash: passwordHash,
+                    FK_media_id: profileImage ? profileImage.id : null
+                },
+            });
+            const tokens = await this._getTokens(newUser.id, newUser.email, newUser.username);
+            await this._updateRefreshToken(newUser.id, tokens.refresh_token);
+            return tokens;
+        }
+        catch (err) {
+            throw new common_1.InternalServerErrorException(`Unable to signup user. Username or email may already be taken`);
+        }
     }
     async signinLocal(dto) {
-        const user = await this._prisma.user.findUnique({
+        const user = await this._prisma.user.findFirst({
             where: {
-                id: 1,
+                OR: [
+                    { email: dto.username },
+                    { username: dto.username }
+                ]
             },
         });
         if (!user) {

@@ -155,20 +155,6 @@ model Challenge_Tag {
 
 model User {
     id Int @id @default(autoincrement())
-    username String @db.VarChar(100) @unique
-    email String @db.VarChar(255) @unique
-    password_hash String @db.VarChar(1000)
-    created_at DateTime?  @default(now())
-    updated_at DateTime?  @updatedAt
-    refresh_token_hash String? @db.VarChar(1000)
-
-    FK_media_id Int?
-    profile Media? @relation(fields: [FK_media_id], references: [id])
-
-    messages User_Message[]
-    groups Member[]
-
-id Int @id @default(autoincrement())
   username String @db.VarChar(100)
   email String @db.VarChar(255)
   password_hash String @db.VarChar(1000)

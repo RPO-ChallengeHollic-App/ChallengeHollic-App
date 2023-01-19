@@ -11,13 +11,17 @@ const common_1 = require("@nestjs/common");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_1 = require("@nestjs/jwt");
-const access_token_strategy_1 = require("../strategies/access-token.strategy");
-const refresh_token_strategy_1 = require("../strategies/refresh-token.strategy");
+const platform_express_1 = require("@nestjs/platform-express");
+const access_token_strategy_1 = require("../shared/strategies/access-token.strategy");
+const refresh_token_strategy_1 = require("../shared/strategies/refresh-token.strategy");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [jwt_1.JwtModule.register({})],
+        imports: [
+            jwt_1.JwtModule.register({}),
+            platform_express_1.MulterModule.register({ dest: './uploads' }),
+        ],
         controllers: [auth_controller_1.AuthController],
         providers: [auth_service_1.AuthService, access_token_strategy_1.AccessTokenStrategy, refresh_token_strategy_1.RefreshTokenStrategy],
     })

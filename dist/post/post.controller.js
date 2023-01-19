@@ -38,9 +38,9 @@ let PostController = class PostController {
         await this._postService.deletePost(postId);
     }
     async updatePost(postId, postDto) {
-        const updatepost = await this._postService.updatePost(postId, postDto);
+        const updatePost = await this._postService.updatePost(postId, postDto);
         return {
-            post: updatepost,
+            post: updatePost,
         };
     }
 };

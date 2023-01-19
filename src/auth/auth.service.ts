@@ -29,7 +29,7 @@ export class AuthService {
       if (profileImageFile) {
         profileImage = await this._prisma.media.create({
           data: {
-            FK_media_type_id: 1,
+            FK_media_type_id: 2,
             path: profileImageFile.originalname,
           }
         });
