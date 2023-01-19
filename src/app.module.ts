@@ -17,7 +17,7 @@ import {MulterModule} from "@nestjs/platform-express";
     ChallengeModule,
     ChallengeModule,
     ChallengeTypeModule,
-  ],
+    ],
   controllers: [],
   providers: [],
 })
