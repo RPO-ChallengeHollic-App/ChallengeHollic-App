@@ -41,120 +41,134 @@ model Group_Type {
 }
 
 model Placement {
-  id Int @id @default(autoincrement())
-  place Int
-  points Decimal @db.Decimal(12,2)
+    id Int @id @default(autoincrement())
+    place Int
+    points Decimal @db.Decimal(12,2)
 
-  participents Participent[]
+    participents Participent[]
 }
 
 model Member_Type {
-  id Int @id @default(autoincrement())
-  type String @db.VarChar(50)
+    id Int @id @default(autoincrement())
+    type String @db.VarChar(50)
 
-  members Role[]
+    members Role[]
 }
 
 model Message_Type {
-  id Int @id @default(autoincrement())
-  type String @db.VarChar(50)
+    id Int @id @default(autoincrement())
+    type String @db.VarChar(50)
 
-  messages Message[]
+    messages Message[]
 }
 
 model Message {
-  id Int @id @default(autoincrement())
-  title String @db.VarChar(50)
-  body String @db.VarChar(500)
-  sent_date DateTime? @default(now())
+    id Int @id @default(autoincrement())
+    title String @db.VarChar(50)
+    body String @db.VarChar(500)
+    sent_date DateTime? @default(now()) @db.Timestamp
 
-  FK_message_type_id Int
-  type Message_Type @relation(fields: [FK_message_type_id], references: [id])
+    FK_message_type_id Int
+    type Message_Type @relation(fields: [FK_message_type_id], references: [id])
 
-  grousp Group_Message[]
-  users User_Message[]
+    grousp Group_Message[]
+    users User_Message[]
 }
 
 model Media {
-  id Int @id @default(autoincrement())
-  path String
-  created_at DateTime?  @default(now())
-  updated_at DateTime?  @updatedAt
+    id Int @id @default(autoincrement())
+    path String
+    created_at DateTime?  @default(now())
+    updated_at DateTime?  @updatedAt
 
-  FK_media_type_id Int
-  type Media_Type @relation(fields: [FK_media_type_id], references: [id])
+    FK_media_type_id Int
+    type Media_Type @relation(fields: [FK_media_type_id], references: [id])
 
-  groups Group[]
-  users User[]
-  posts Media_Post[]
+    groups Group[]
+    users User[]
+    posts Media_Post[]
 }
 
 model Group {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(100)
-  created_at DateTime?  @default(now())
-  updated_at DateTime?  @updatedAt
+    id Int @id @default(autoincrement())
+    name String @db.VarChar(100)
+    created_at DateTime?  @default(now())
+    updated_at DateTime?  @updatedAt
 
-  FK_group_type_id Int
-  type Group_Type @relation(fields: [FK_group_type_id], references: [id])
+    FK_group_type_id Int
+    type Group_Type @relation(fields: [FK_group_type_id], references: [id])
 
-  FK_media_id Int // Grup profile pic
-  profile Media @relation(fields: [FK_media_id], references: [id])
+    FK_media_id Int // Grup profile pic
+    profile Media @relation(fields: [FK_media_id], references: [id])
 
-  messages Group_Message[]
-  challenges Challenge[]
-  users Member[]
+    messages Group_Message[]
+    challenges Challenge[]
+    users Member[]
 }
 
 model Group_Message {
-  id Int @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  FK_message_id Int
-  message Message @relation(fields: [FK_message_id], references: [id])
+    FK_message_id Int
+    message Message @relation(fields: [FK_message_id], references: [id])
 
-  FK_group_id Int
-  group Group @relation(fields: [FK_group_id], references: [id])
+    FK_group_id Int
+    group Group @relation(fields: [FK_group_id], references: [id])
 }
 
 model Challenge {
-  id Int @id @default(autoincrement())
-  name String @db.VarChar(100)
-  start_date DateTime?
-  deadline DateTime?
+    id Int @id @default(autoincrement())
+    name String @db.VarChar(100)
+    start_date DateTime?
+    deadline DateTime?
 
-  FK_challenge_type_id Int
-  type Challenge_Type @relation(fields: [FK_challenge_type_id], references: [id])
+    FK_challenge_type_id Int
+    type Challenge_Type @relation(fields: [FK_challenge_type_id], references: [id])
 
-  FK_group_id Int
-  group Group @relation(fields: [FK_group_id], references: [id])
+    FK_group_id Int
+    group Group @relation(fields: [FK_group_id], references: [id])
 
-  point_distributions Point_Distribution[]
-  tags Challenge_Tag[]
-  participents Participent[]
+    point_distributions Point_Distribution[]
+    tags Challenge_Tag[]
+    participents Participent[]
 }
 
 model Point_Distribution {
-  id Int @id @default(autoincrement())
-  start_place Int
-  end_place Int?
-  amount Decimal @db.Decimal(12, 2)
+    id Int @id @default(autoincrement())
+    start_place Int
+    end_place Int?
+    amount Decimal @db.Decimal(12, 2)
 
-  FK_challenge_id Int
-  challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
+    FK_challenge_id Int
+    challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
 }
 
 model Challenge_Tag {
-  id Int @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 
-  FK_challenge_id Int
-  challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
+    FK_challenge_id Int
+    challenge Challenge @relation(fields: [FK_challenge_id], references: [id])
 
-  FK_tag_id Int
-  tag Tag @relation(fields: [FK_tag_id], references: [id])
+    FK_tag_id Int
+    tag Tag @relation(fields: [FK_tag_id], references: [id])
 }
 
 model User {
-  id Int @id @default(autoincrement())
+    id Int @id @default(autoincrement())
+    username String @db.VarChar(100) @unique
+    email String @db.VarChar(255) @unique
+    password_hash String @db.VarChar(1000)
+    created_at DateTime?  @default(now())
+    updated_at DateTime?  @updatedAt
+    refresh_token_hash String? @db.VarChar(1000)
+
+    FK_media_id Int?
+    profile Media? @relation(fields: [FK_media_id], references: [id])
+
+    messages User_Message[]
+    groups Member[]
+
+id Int @id @default(autoincrement())
   username String @db.VarChar(100)
   email String @db.VarChar(255)
   password_hash String @db.VarChar(1000)

@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
-import { MemberModule } from './member/member.module';
-import { RoleModule } from './role/role.module';
-import { MemberTypeModule } from './member-type/member-type.module';
-import { PostModule } from './post/post.module';
-import { ChallengeTagModule } from './challenge_tag/challenge_tag.module';
+import {AuthModule} from "./auth/auth.module";
+import { PlacementModule } from './placement/placement.module';
+import { ParticipentModule } from './participent/participent.module';
+import { ChallengeModule } from './challenge/challenge.module';
+import { ChallengeTypeModule } from './challenge-type/challenge-type.module';
+import {MulterModule} from "@nestjs/platform-express";
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true }), PrismaModule,MemberModule, RoleModule, MemberTypeModule, PostModule, ChallengeTagModule],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
+    AuthModule,
+    PlacementModule,
+    ParticipentModule,
+    ChallengeModule,
+    ChallengeModule,
+    ChallengeTypeModule,
+    ],
   controllers: [],
   providers: [],
 })
